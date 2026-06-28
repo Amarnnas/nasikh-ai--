@@ -214,7 +214,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onFilesSelected })
                 <span className="text-[11px] text-slate-400">جاري الاتصال بالسكانر...</span>
               )}
               {scannerStatus === 'no_scanner' && (
-                <span className="text-[11px] text-red-500" title={scannerName}>لم يتم العثور على سكانر متصل</span>
+                <span className="text-[11px] text-red-500" title={'معلومات إضافية: ' + scannerName}>لم يتم العثور على سكانر
+                  <button onClick={(e) => { e.stopPropagation(); checkScanner(); }} className="mr-1 underline hover:text-red-700">إعادة فحص</button>
+                </span>
               )}
               {scannerStatus === 'ready' && (
                 <span className="text-[11px] text-green-600">{scannerName || 'السكانر'} جاهز</span>
