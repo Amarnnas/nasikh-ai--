@@ -25,7 +25,7 @@ app.get('/status', (req, res) => {
     const code = parts[0];
 
     if (code === 'OK') {
-      res.json({ status: 'ok', name: parts[1] || 'Scanner' });
+      res.json({ status: 'ok', name: parts[2] || 'Scanner' });
     } else if (code === 'NO_SCANNER') {
       res.json({ status: 'no_scanner' });
     } else {

@@ -2,7 +2,7 @@ param([string]$OutputPath)
 
 try {
     $deviceManager = New-Object -ComObject WIA.DeviceManager
-    $deviceInfo = $deviceManager.DeviceInfos | Where-Object { $_.Type -eq 2 } | Select-Object -First 1
+    $deviceInfo = @($deviceManager.DeviceInfos) | Where-Object { $_.Type -in @(1,2,3) } | Select-Object -First 1
 
     if ($null -eq $deviceInfo) {
         Write-Output "ERROR:No scanner device found"
