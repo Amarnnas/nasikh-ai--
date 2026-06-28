@@ -8,6 +8,30 @@ import { ImageUploader } from './components/ImageUploader';
 import { Button } from './components/Button';
 import { ResultView } from './components/ResultView';
 
+const ScrollTopButton = () => {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = document.querySelector('main');
+    const onScroll = () => setVisible((el?.scrollTop || 0) > 300);
+    el?.addEventListener('scroll', onScroll);
+    return () => el?.removeEventListener('scroll', onScroll);
+  }, []);
+  const scroll = (top: boolean) => {
+    document.querySelector('main')?.scrollTo({ top: top ? 0 : 99999, behavior: 'smooth' });
+  };
+  if (!visible) return null;
+  return (
+    <div className="fixed bottom-6 left-6 z-40 flex flex-col gap-2">
+      <button onClick={() => scroll(true)} className="w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center text-indigo-600 hover:bg-indigo-50 border border-slate-200" title="للأعلى">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
+      </button>
+      <button onClick={() => scroll(false)} className="w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center text-indigo-600 hover:bg-indigo-50 border border-slate-200" title="للأسفل">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+      </button>
+    </div>
+  );
+};
+
 const CONCURRENCY_LIMIT = 2;
 
 const App: React.FC = () => {
@@ -233,41 +257,43 @@ const App: React.FC = () => {
   return (
     <div className="flex h-full bg-slate-50">
       <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-indigo-200 shadow-lg">ن</div>
-            <div>
-                <h1 className="text-xl font-bold text-slate-800">ناسخ الذكي (Nasikh AI)</h1>
-                <p className="text-xs text-slate-500">دعم الصور وPDF والجداول</p>
+        <header className="bg-white border-b border-slate-200 px-3 sm:px-6 py-3 sm:py-4 flex flex-wrap items-center justify-between shadow-sm z-10 gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-base sm:text-xl shadow-indigo-200 shadow-lg shrink-0">ن</div>
+            <div className="min-w-0">
+                <h1 className="text-sm sm:text-lg md:text-xl font-bold text-slate-800 truncate">ناسخ الذكي</h1>
+                <p className="text-[10px] sm:text-xs text-slate-500 truncate">OCR بالذكاء الاصطناعي</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-             <div className="flex bg-slate-100 p-1 rounded-lg ring-1 ring-slate-200">
-                <button title="تحليل المستندات التعليمية: استخراج منظم للأسئلة، جداول، أعمدة، وبيانات الصف والجهة" onClick={() => setOcrMode(OcrMode.Educational)} className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-md transition-all ${ocrMode === OcrMode.Educational ? 'bg-white shadow text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-700'}`}>تحليل تعليمي</button>
-                <button title="الحفاظ على تنسيق المستند الأصلي: العناوين، القوائم، الجداول، والخطوط" onClick={() => setOcrMode(OcrMode.Formatting)} className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-md transition-all ${ocrMode === OcrMode.Formatting ? 'bg-white shadow text-indigo-600 font-medium' : 'text-slate-500 hover:text-slate-700'}`}>تنسيق ذكي</button>
-                <button title="استخراج النص فقط بدون أي تنسيق أو تحليل إضافي" onClick={() => setOcrMode(OcrMode.Standard)} className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-md transition-all ${ocrMode === OcrMode.Standard ? 'bg-white shadow text-indigo-600 font-medium' : 'text-slate-500 hover:text-slate-700'}`}>نص عادي</button>
+          <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-end">
+             <div className="flex bg-slate-100 p-0.5 sm:p-1 rounded-lg ring-1 ring-slate-200 overflow-x-auto w-full sm:w-auto">
+                <button title="تحليل المستندات التعليمية" onClick={() => setOcrMode(OcrMode.Educational)} className={`px-1.5 sm:px-3 py-1 text-[10px] sm:text-xs md:text-sm rounded-md whitespace-nowrap transition-all ${ocrMode === OcrMode.Educational ? 'bg-white shadow text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-700'}`}>تعليمي</button>
+                <button title="الحفاظ على تنسيق المستند الأصلي" onClick={() => setOcrMode(OcrMode.Formatting)} className={`px-1.5 sm:px-3 py-1 text-[10px] sm:text-xs md:text-sm rounded-md whitespace-nowrap transition-all ${ocrMode === OcrMode.Formatting ? 'bg-white shadow text-indigo-600 font-medium' : 'text-slate-500 hover:text-slate-700'}`}>تنسيق</button>
+                <button title="استخراج النص فقط" onClick={() => setOcrMode(OcrMode.Standard)} className={`px-1.5 sm:px-3 py-1 text-[10px] sm:text-xs md:text-sm rounded-md whitespace-nowrap transition-all ${ocrMode === OcrMode.Standard ? 'bg-white shadow text-indigo-600 font-medium' : 'text-slate-500 hover:text-slate-700'}`}>نص عادي</button>
              </div>
-             {stats.total > 0 && <div className="hidden sm:block text-sm font-medium text-slate-600">{stats.completed}/{stats.total} مكتمل</div>}
+             {stats.total > 0 && <div className="hidden sm:block text-sm font-medium text-slate-600 shrink-0">{stats.completed}/{stats.total}</div>}
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6 md:p-8">
-            <div className="max-w-6xl mx-auto space-y-8">
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-6 md:p-8">
+            <div className="max-w-6xl mx-auto space-y-4 sm:space-y-8">
+                <div className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-100">
                     <ImageUploader onFilesSelected={handleFilesSelected} />
                     {stats.total > 0 && (
-                        <div className="flex flex-col md:flex-row items-center justify-between mt-6 pt-6 border-t border-slate-100 animate-fade-in gap-4">
-                            <Button variant="secondary" onClick={handleSortByName} title="ترتيب أبجدياً" icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" /></svg>}>ترتيب بالاسم</Button>
-                            <div className="flex gap-3 w-full md:w-auto justify-end">
-                                <Button variant="ghost" onClick={clearAll} disabled={isProcessing}>مسح الكل</Button>
-                                <Button variant="secondary" onClick={handleExportDocx} disabled={stats.completed === 0} icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-blue-600"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>}>تصدير DOCX</Button>
-                                <Button onClick={startProcessing} isLoading={isProcessing && stats.pending > 0} disabled={stats.pending === 0}>بدء التحويل</Button>
+                        <div className="flex flex-col sm:flex-row items-center justify-between mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-slate-100 gap-3">
+                            <div className="flex gap-2 w-full sm:w-auto">
+                                <Button variant="secondary" size="sm" onClick={handleSortByName} title="ترتيب أبجدياً" icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" /></svg>}>ترتيب</Button>
+                            </div>
+                            <div className="flex gap-2 w-full sm:w-auto justify-end flex-wrap">
+                                <Button variant="ghost" size="sm" onClick={clearAll} disabled={isProcessing}>مسح</Button>
+                                <Button variant="secondary" size="sm" onClick={handleExportDocx} disabled={stats.completed === 0} icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-blue-600"><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>}>DOCX</Button>
+                                <Button size="sm" onClick={startProcessing} isLoading={isProcessing && stats.pending > 0} disabled={stats.pending === 0}>تحويل</Button>
                             </div>
                         </div>
                     )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 pb-20">
                     {images.map((img, index) => (
                         <div key={img.id} draggable onDragStart={(e) => handleDragStart(e, index)} onDragEnter={(e) => handleDragEnter(e, index)} onDragEnd={handleDragEnd} onDragOver={(e) => e.preventDefault()} onClick={() => setViewingImageId(img.id)} className={`group relative bg-white rounded-xl shadow-sm border overflow-hidden cursor-pointer transition-all hover:shadow-md active:cursor-grabbing hover:scale-[1.01] ${img.status === 'processing' ? 'ring-2 ring-indigo-500 border-indigo-500' : 'border-slate-200'}`}>
                             <button onClick={(e) => { e.stopPropagation(); removeImage(img.id); }} className="absolute top-2 left-2 z-10 bg-white/80 hover:bg-red-50 text-slate-400 hover:text-red-500 p-1.5 rounded-full backdrop-blur-sm transition-colors opacity-0 group-hover:opacity-100">
@@ -294,6 +320,7 @@ const App: React.FC = () => {
             </div>
         </main>
         {viewingImage && <ResultView selectedImage={viewingImage} onClose={() => setViewingImageId(null)} />}
+        <ScrollTopButton />
       </div>
     </div>
   );

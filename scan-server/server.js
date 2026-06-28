@@ -2,6 +2,7 @@ import { execSync } from 'child_process';
 import { mkdirSync, existsSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import os from 'os';
 import express from 'express';
 import cors from 'cors';
 
@@ -10,7 +11,7 @@ const app = express();
 app.use(cors());
 
 const scriptsDir = __dirname;
-const outputDir = join(__dirname, 'scans');
+const outputDir = join(os.tmpdir(), 'nasikh-scans');
 mkdirSync(outputDir, { recursive: true });
 
 const runPowershell = (script, args = '') => {
