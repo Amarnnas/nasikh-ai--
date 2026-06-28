@@ -14,7 +14,7 @@ const App: React.FC = () => {
   const [images, setImages] = useState<ScannedImage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [viewingImageId, setViewingImageId] = useState<string | null>(null);
-  const [ocrMode, setOcrMode] = useState<OcrMode>(OcrMode.Educational);
+  const [ocrMode, setOcrMode] = useState<OcrMode>(OcrMode.Standard);
   
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
@@ -243,9 +243,9 @@ const App: React.FC = () => {
           </div>
           <div className="flex items-center gap-4">
              <div className="flex bg-slate-100 p-1 rounded-lg ring-1 ring-slate-200">
-                <button onClick={() => setOcrMode(OcrMode.Educational)} className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-md transition-all ${ocrMode === OcrMode.Educational ? 'bg-white shadow text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-700'}`}>تحليل تعليمي</button>
-                <button onClick={() => setOcrMode(OcrMode.Formatting)} className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-md transition-all ${ocrMode === OcrMode.Formatting ? 'bg-white shadow text-indigo-600 font-medium' : 'text-slate-500 hover:text-slate-700'}`}>تنسيق ذكي</button>
-                <button onClick={() => setOcrMode(OcrMode.Standard)} className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-md transition-all ${ocrMode === OcrMode.Standard ? 'bg-white shadow text-indigo-600 font-medium' : 'text-slate-500 hover:text-slate-700'}`}>نص عادي</button>
+                <button title="تحليل المستندات التعليمية: استخراج منظم للأسئلة، جداول، أعمدة، وبيانات الصف والجهة" onClick={() => setOcrMode(OcrMode.Educational)} className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-md transition-all ${ocrMode === OcrMode.Educational ? 'bg-white shadow text-indigo-600 font-bold' : 'text-slate-500 hover:text-slate-700'}`}>تحليل تعليمي</button>
+                <button title="الحفاظ على تنسيق المستند الأصلي: العناوين، القوائم، الجداول، والخطوط" onClick={() => setOcrMode(OcrMode.Formatting)} className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-md transition-all ${ocrMode === OcrMode.Formatting ? 'bg-white shadow text-indigo-600 font-medium' : 'text-slate-500 hover:text-slate-700'}`}>تنسيق ذكي</button>
+                <button title="استخراج النص فقط بدون أي تنسيق أو تحليل إضافي" onClick={() => setOcrMode(OcrMode.Standard)} className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-md transition-all ${ocrMode === OcrMode.Standard ? 'bg-white shadow text-indigo-600 font-medium' : 'text-slate-500 hover:text-slate-700'}`}>نص عادي</button>
              </div>
              {stats.total > 0 && <div className="hidden sm:block text-sm font-medium text-slate-600">{stats.completed}/{stats.total} مكتمل</div>}
           </div>
