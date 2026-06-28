@@ -15,6 +15,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onFilesSelected })
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [scanning, setScanning] = useState(false);
   const [scannerStatus, setScannerStatus] = useState<'unknown' | 'ready' | 'no_scanner' | 'offline'>('unknown');
+  const [scannerName, setScannerName] = useState('');
 
   useEffect(() => {
     return () => {
@@ -67,11 +68,22 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onFilesSelected })
     }, 'image/jpeg', 0.95);
   };
 
-  useEffect(() => {
-    fetch(`${SCAN_SERVER}/status`, { signal: AbortSignal.timeout(3000) })
-      .then(r => r.json()).then(d => setScannerStatus(d.status === 'ok' ? 'ready' : 'no_scanner'))
+  const checkScanner = () => {
+    fetch(`${SCAN_SERVER}/status`, { signal: AbortSignal.timeout(5000) })
+      .then(r => r.json())
+      .then(d => {
+        if (d.status === 'ok') {
+          setScannerStatus('ready');
+          setScannerName(d.name || 'Scanner');
+        } else {
+          setScannerStatus('no_scanner');
+          setScannerName(d.detail || '');
+        }
+      })
       .catch(() => setScannerStatus('offline'));
-  }, []);
+  };
+
+  useEffect(() => { checkScanner(); }, []);
 
   const scanFromPrinter = async () => {
     setScanning(true);
@@ -194,13 +206,18 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onFilesSelected })
                 {scanning ? 'جاري المسح...' : 'مسح ضوئي (Scanner)'}
               </button>
               {scannerStatus === 'offline' && (
-                <span className="text-[11px] text-amber-600">شغّل scan-server على جهازك للاستخدام المباشر</span>
+                <span className="text-[11px] text-amber-600">شغّل scan-server على جهازك للاستخدام المباشر
+                  <button onClick={(e) => { e.stopPropagation(); checkScanner(); }} className="mr-1 underline hover:text-amber-800">إعادة محاولة</button>
+                </span>
               )}
               {scannerStatus === 'unknown' && (
                 <span className="text-[11px] text-slate-400">جاري الاتصال بالسكانر...</span>
               )}
+              {scannerStatus === 'no_scanner' && (
+                <span className="text-[11px] text-red-500" title={scannerName}>لم يتم العثور على سكانر متصل</span>
+              )}
               {scannerStatus === 'ready' && (
-                <span className="text-[11px] text-green-600">السكانر جاهز على جهازك</span>
+                <span className="text-[11px] text-green-600">{scannerName || 'السكانر'} جاهز</span>
               )}
             </div>
           </div>

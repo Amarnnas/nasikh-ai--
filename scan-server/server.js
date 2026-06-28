@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { writeFileSync, mkdirSync } from 'fs';
+import { mkdirSync, existsSync, readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
@@ -9,19 +9,30 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 app.use(cors());
 
-const scanScriptPath = join(__dirname, 'scan.ps1');
+const scriptsDir = __dirname;
 const outputDir = join(__dirname, 'scans');
 mkdirSync(outputDir, { recursive: true });
 
+const runPowershell = (script, args = '') => {
+  const cmd = `powershell -NoProfile -ExecutionPolicy Bypass -File "${join(scriptsDir, script)}" ${args}`;
+  return execSync(cmd, { timeout: 30000, encoding: 'utf8' }).trim();
+};
+
 app.get('/status', (req, res) => {
   try {
-    const result = execSync(
-      `powershell -NoProfile -Command "try { $m = New-Object -ComObject WIA.DeviceManager; $d = $m.DeviceInfos | Where-Object { \\$_.Type -eq 2 } | Select-Object -First 1; if ($d) { 'ok' } else { 'no_scanner' } } catch { 'error' }"`,
-      { timeout: 10000, encoding: 'utf8' }
-    );
-    res.json({ status: result.trim() });
-  } catch {
-    res.json({ status: 'error' });
+    const result = runPowershell('status.ps1');
+    const parts = result.split('|');
+    const code = parts[0];
+
+    if (code === 'OK') {
+      res.json({ status: 'ok', name: parts[1] || 'Scanner' });
+    } else if (code === 'NO_SCANNER') {
+      res.json({ status: 'no_scanner' });
+    } else {
+      res.json({ status: 'error', detail: parts.slice(1).join('|') });
+    }
+  } catch (e) {
+    res.json({ status: 'error', detail: e.message });
   }
 });
 
@@ -35,29 +46,27 @@ app.get('/scan', async (req, res) => {
     res.write('data: {"step": "scanning"}\n\n');
 
     const outputFile = join(outputDir, `scan_${Date.now()}.jpg`);
-    const command = `powershell -NoProfile -ExecutionPolicy Bypass -File "${scanScriptPath}" -OutputPath "${outputFile}"`;
-    const result = execSync(command, { timeout: 60000, encoding: 'utf8' });
-    const lines = result.trim().split('\n');
+    const result = runPowershell('scan.ps1', `-OutputPath "${outputFile}"`);
+    const lines = result.split('\n');
     const imagePath = lines[lines.length - 1].trim();
 
-    if (!imagePath || !imagePath.endsWith('.jpg')) {
-      res.write(`data: {"step": "error", "message": "${(imagePath || 'Scan failed').replace(/"/g, '\\"')}"}\n\n`);
+    if (imagePath.startsWith('ERROR')) {
+      res.write(`data: ${JSON.stringify({ step: 'error', message: imagePath.replace('ERROR:', '') })}\n\n`);
       res.end();
       return;
     }
 
-    const fs = await import('fs');
-    if (!fs.existsSync(imagePath)) {
+    if (!existsSync(imagePath)) {
       res.write('data: {"step": "error", "message": "Output file not found"}\n\n');
       res.end();
       return;
     }
 
-    const base64 = fs.readFileSync(imagePath, { encoding: 'base64' });
-    res.write(`data: {"step": "done", "image": "data:image/jpeg;base64,${base64}"}\n\n`);
+    const base64 = readFileSync(imagePath, { encoding: 'base64' });
+    res.write(`data: ${JSON.stringify({ step: 'done', image: `data:image/jpeg;base64,${base64}` })}\n\n`);
     res.end();
   } catch (e) {
-    res.write(`data: {"step": "error", "message": "Scanner error: ${e.message.replace(/"/g, '\\"')}"}\n\n`);
+    res.write(`data: ${JSON.stringify({ step: 'error', message: e.message })}\n\n`);
     res.end();
   }
 });
