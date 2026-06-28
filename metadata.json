@@ -1,0 +1,8 @@
+{
+  "name": "Nasikh AI (ناُسخ)",
+  "description": "High-accuracy batch OCR tool optimized for Arabic and English documents. Preserves formatting using Gemini 3.5 Flash, with dedicated educational layout analysis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
